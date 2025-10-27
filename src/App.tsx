@@ -6,42 +6,47 @@ import Login from "./pages/Login.tsx";
 import Home from "./pages/Home.tsx";
 import Products from "./pages/Products.tsx";
 import Admin from "./pages/Admin.tsx";
-/* import PrivateRoute from "./routes/PrivateRoute.tsx";
-import AdminRoute from "./routes/AdminRoute.tsx"; */
+import ProtectedRoutes from './routes/ProtectedRoutes.tsx';
+
 
 function RootRedirect() {
   const { user} = useAuth();
   return <Navigate to={user ? "/home" : "/login"} replace />;
 }
 
-export default function App() {
-return(
-  <BrowserRouter>
-    <AuthProvider>
-      <Header />
-      <main style={{ padding: '1rem' }}>
-        <Routes>
-          <Route path="/" element={<RootRedirect />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/home" element={
-            <PrivateRoute>
-              <Home />
-            </PrivateRoute>
-          } />
-          <Route path="/products" element={
-            <PrivateRoute>
-              <Products />
-            </PrivateRoute>
-          } />
-          <Route path="/admin" element={
-            <AdminRoute>
-              <Admin />
-            </AdminRoute>
-          } />
-          <Route path="*" element={<RootRedirect />} />
-        </Routes>
-      </main>
-    </AuthProvider>
-  </BrowserRouter>    
-)
+const AppRoutes: React.FC = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<RootRedirect />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/home" element={
+        <ProtectedRoutes>
+          <Home />
+        </ProtectedRoutes>
+      } />  
+      <Route path="/products" element={
+        <ProtectedRoutes>
+          <Products />
+        </ProtectedRoutes>
+      } />
+      <Route path="/admin" element={
+        <ProtectedRoutes requiredRole="admin">
+          <Admin />
+        </ProtectedRoutes>
+      } />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 }
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Header />
+        <AppRoutes />
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
+
+export default App;
